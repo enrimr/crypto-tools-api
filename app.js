@@ -47,6 +47,7 @@ const mapError = function(error) {
   let message = error.message;
   let type = error.name
   let code = error.code;
+  let status = error.status;
   
   switch (error.message) {
     case 'Invalid checksum':
@@ -54,6 +55,7 @@ const mapError = function(error) {
     case 'The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received undefined':
       type = "INVALID_ARGUMENT"
       code = 1000200;
+      status = 400;
       break;
     default:
       if (app.get('env') !== 'development') {
@@ -66,7 +68,8 @@ const mapError = function(error) {
   return { 
     message: message,
     type: type,
-    code: code
+    code: code,
+    status: status
   }
 }
 // error handler
@@ -78,7 +81,8 @@ app.use(function(err, req, res, next) {
   // send error
   console.log(err)
   const errorMapped = mapError(err)
-  res.status(err.status || 500).json(
+  //res.status(err.status || 500).json(
+  res.status(errorMapped.status || 500).json(
     {
       error: { 
         message: errorMapped.message,
